@@ -64,10 +64,8 @@ function AddItems() {
   const runAfterUpdate = useRunAfterUpdate();
 
   const handleNameChange = evt => {
-    debugger;
     const input = evt.target;
     const text = input.value;
-    console.log("text",text)
     if (text === "") {
       return;
     }
