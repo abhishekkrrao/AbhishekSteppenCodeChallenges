@@ -1,34 +1,106 @@
 import { ItemList } from "./ItemList.jsx"
-
+import { v4 as uuidv4 } from 'uuid';
+import React from 'react';
 import "bulma/css/bulma.min.css"
-
+import "./App.css";
+const initialList = [];
+const listReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_ITEM':
+      return {
+        ...state,
+        list: state.list.concat({ name: action.name, id: action.id }),
+      };
+    default:
+      throw new Error();
+  }
+};
 function App() {
   return (
     <section className="section">
-      <div className="box">
-        <h1 className="title">Item List with Add, Edit and Remove</h1>
-        <p>Open <code>ItemList.jsx</code> and implement your component named <code>ItemList</code>.</p>
-      </div>
-
-      <h3 className="title is-4">Task</h3>
-      <div className="content">
-        <p>Create a list of text items, with add, edit and remove functionality:</p>
-        <ul>
-          <li>Start the list empty.</li>
-          <li>The last item in the list is a text field where you can enter free text.</li>
-          <li>When the text field is submitted (either with a button or by pressing enter), the text in the field is added to the list as a new item.</li>
-          <li>Display each of the items as a separate paragraph when added.</li>
-          <li>When you hover over a list item, two buttons appear to the left of it - a delete button and an edit button.</li>
-          <li>Pressing the delete button asks for confirmation and then removes the item from the list.</li>
-          <li>Pressing the edit button turns the list item back into a text field, and when that field is submitted (either with a button or by pressing enter) it updates the list item.</li>
-        </ul>
-        <p>Use <code>bulma</code> classes for styling - the library is included in the bundle already.</p>
-      </div>
-
-      <h3 className="title is-4">Test</h3>
-      <ItemList />
+      <AddItems></AddItems>
     </section>
   )
 }
 
-export default App
+export default App;
+
+function useRunAfterUpdate() {
+  const afterPaintRef = React.useRef(null);
+  React.useLayoutEffect(() => {
+    if (afterPaintRef.current) {
+      afterPaintRef.current();
+      afterPaintRef.current = null;
+    }
+  });
+  const runAfterUpdate = fn => (afterPaintRef.current = fn);
+  return runAfterUpdate;
+}
+
+function filterOut(text, cursor) {
+  const beforeCursor = text.slice(0, cursor);
+  const afterCursor = text.slice(cursor, text.length);
+
+  const filterdBeforeCursor = strip(beforeCursor);
+  const filterAfterCursor = strip(afterCursor);
+
+  const newText = filterdBeforeCursor + filterAfterCursor;
+  const newCursor = filterdBeforeCursor.length;
+
+  return [newText, newCursor];
+}
+
+
+function AddItems() {
+
+  const [listData, dispatchListData] = React.useReducer(listReducer, {
+    list: initialList,
+    isShowList: true,
+  });
+
+
+  const [name, setName] = React.useState("");
+
+  const runAfterUpdate = useRunAfterUpdate();
+
+  const handleNameChange = evt => {
+    debugger;
+    const input = evt.target;
+    const text = input.value;
+    console.log("text",text)
+    if (text === "") {
+      return;
+    }
+    const cursor = input.selectionStart;
+
+    const [newName, newCursor] = filterOut(text, cursor);
+
+    setName(newName);
+
+    runAfterUpdate(() => {
+      input.selectionStart = newCursor;
+      input.selectionEnd = newCursor;
+    });
+  };
+  function onAdd() {
+    dispatchListData({ type: 'ADD_ITEM', name, id: uuidv4() });
+    setName('');
+  }
+
+  return (
+    <div>
+      <input
+        style={{ height: 48, width: 300 }}
+        placeholder="Enter Item"
+        value={name}
+        onChange={handleNameChange}
+      />
+      <button style={{ width: 120, background: "#000", color: "#FFF", height: 38, padding: 5, borderRadius: 25, marginLeft: 20 }} type="button" onClick={onAdd}>
+        Add
+      </button>
+      {listData.list.length == 0 && <div>{"No item in list !!!"}</div>}
+      <ItemList data={listData.list} />
+    </div>
+  );
+}
+const strip = value => value.replace(/[^a-zA-Z\s]/g, "");
