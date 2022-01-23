@@ -5,8 +5,8 @@ export const TwoPaneList = ({ data }) => {
   const [items, setItems] = useState([]);
 
   const onContentClick = (objItem) => {
-    let index = items.indexOf(objItem);
-    items.forEach((el, pos) => {
+    let index = data.indexOf(objItem);
+    let u = data.map((el, pos) => {
       if (pos === index && el.isChecked === false) {
         data[pos].isChecked = true;
       } else if (pos === index && el.isChecked === true) {
@@ -14,13 +14,13 @@ export const TwoPaneList = ({ data }) => {
       } else {
         data[pos].isChecked = false;
       }
+      return el;
     });
-    setItems(items);
+    setItems(u);
   }
-
   useEffect(() => {
     setItems(data);
-  }, [items, data]);
+  }, [data]);
 
   return (
     <ul>
@@ -39,12 +39,11 @@ export const TwoPaneList = ({ data }) => {
           <div
             style={{ display: "flex", flexDirection: "column", flex: 1 }}
             className="mRightPane">
-            {item.isChecked === true && item.content.map((subContent, pos) => {
-              return (<p
-                style={{ marginTop: 5, background: "#CCC", marginLeft: 10, borderRadius: 6, padding: 10 }}
-                className="rightPaneStyle"
-                key={pos.toString()}>{subContent}</p>);
-            })}
+            {item.isChecked && item.content.map((subContent, pos) => (<p
+              style={{ marginTop: 5, background: "#CCC", marginLeft: 10, borderRadius: 6, padding: 10 }}
+              className="rightPaneStyle"
+              key={pos.toString()}>{subContent}</p>)
+            )}
           </div>
         </div>
 
