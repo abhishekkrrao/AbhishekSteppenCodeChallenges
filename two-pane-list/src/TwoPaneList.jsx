@@ -39,9 +39,6 @@ export const TwoPaneList = ({ data }) => {
           <div
             style={{ display: "flex", flexDirection: "column", flex: 1 }}
             className="mRightPane">
-            <div>
-              {item.isChecked.toString()}
-            </div>
             {item.isChecked && item.content.map((subContent, pos) => (<p
               style={{ marginTop: 5, background: "#CCC", marginLeft: 10, borderRadius: 6, padding: 10 }}
               className="rightPaneStyle"
